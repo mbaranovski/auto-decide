@@ -26,7 +26,11 @@ When Claude encounters multiple implementation paths (e.g., "Option A vs Option 
 
 ## Installation
 
-Copy `SKILL.md` into your Claude Code skills directory.
+```bash
+npx skills add mbaranovski/auto-decide
+```
+
+Or manually copy `SKILL.md` into your Claude Code skills directory.
 
 ## Evaluation Suite
 
