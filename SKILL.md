@@ -1,6 +1,6 @@
 ---
 name: auto-decide
-description: Use when facing multiple implementation options, design alternatives, or architectural choices during planning, brainstorming, or coding. Triggers: "which approach", "option A vs B", "we could either...", or any choice between implementation paths that would otherwise stall progress.
+description: 'Use when facing multiple implementation options, design alternatives, or architectural choices during planning, brainstorming, or coding. Triggers: "which approach", "option A vs B", "we could either...", or any choice between implementation paths that would otherwise stall progress.'
 model: opus
 compatibility: planning, brainstorming, coding
 disable-model-invocation: true
