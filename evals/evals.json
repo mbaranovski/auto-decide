@@ -1,0 +1,131 @@
+{
+  "skill_name": "auto-decide",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to build a real-time chat application with typing indicators and read receipts. Here are the options we came up with:\n\nOption A: Use WebSockets for all real-time features (messages, typing indicators, read receipts). Single persistent connection per client.\n\nOption B: Use Server-Sent Events for message delivery, but implement typing indicators and read receipts via REST polling every 2 seconds. Simpler server-side, but polling adds latency.\n\nOption C: Use WebSockets for messages only. Defer typing indicators and read receipts to phase 2 since they're 'nice to have' features. Ship faster.\n\nWhich approach should we go with?",
+      "expected_output": "Should choose Option A. Option C explicitly defers features (typing indicators and read receipts) that were part of the original request. Option B technically delivers everything but degrades the real-time experience with polling. Option A delivers all requested features with proper real-time behavior.",
+      "files": [],
+      "assertions": [
+        "Chooses Option A (WebSockets for everything)",
+        "Rejects Option C because it defers features that were explicitly requested",
+        "Notes that Option B delivers all features but with degraded real-time fidelity",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose",
+        "Continues with implementation or next steps after deciding"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The user originally asked: 'Build me an admin dashboard with data tables that support filtering, sorting, and export to CSV.'\n\nDuring planning, we identified these approaches:\n\nOption A: Client-side filtering and sorting with a CSV export button. All data loaded upfront. Simple to implement but won't scale past ~10k rows.\n\nOption B: Server-side filtering and sorting with pagination. Scales well. CSV export will be added in a follow-up PR since it requires a background job for large datasets.\n\nOption C: Server-side filtering, sorting, and pagination. CSV export implemented as an async endpoint that emails the file when ready for large datasets, or downloads immediately for small ones.\n\nWhich should we pick?",
+      "expected_output": "Should choose Option C. Option B explicitly defers CSV export to a follow-up PR, violating the original request. Option A delivers everything but won't scale. Option C delivers all three features (filtering, sorting, export) with a scalable approach.",
+      "files": [],
+      "assertions": [
+        "Chooses Option C (server-side with async CSV export)",
+        "Rejects Option B because it defers CSV export which was an explicit requirement",
+        "Acknowledges Option A delivers all features but flags the scalability limitation",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose",
+        "Continues with implementation or next steps after deciding"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "User's original request: 'Add a notification system that supports email, push notifications, and in-app notifications. Users should be able to set preferences for each channel.'\n\nHere are the architecture options:\n\nOption A: Unified notification service with a channel abstraction. Each channel (email, push, in-app) is a plugin. User preferences stored in a preferences table. All three channels implemented now.\n\nOption B: Start with in-app notifications only (simplest channel). Add email and push later as separate services. Preferences UI only shows in-app toggle for now.\n\nOption C: Implement all three channels but use a simple if/else routing instead of a plugin architecture. User preferences stored in a JSON column on the users table. Works but harder to extend if new channels are added later.\n\nOption D: Implement all three channels with the plugin architecture from Option A, but skip the user preferences feature for now — send all notification types to everyone. Add preferences in the next sprint.\n\nWhich approach?",
+      "expected_output": "Should choose Option A. Option B defers two of three channels. Option D skips user preferences which were explicitly requested. Option C delivers everything but Option A is more comprehensive/future-proof. Between A and C, A wins on comprehensiveness since both deliver all features.",
+      "files": [],
+      "assertions": [
+        "Chooses Option A (unified service with plugin architecture, all channels, preferences)",
+        "Rejects Option B because it defers email and push channels",
+        "Rejects Option D because it skips user preferences which were explicitly requested",
+        "Recognizes Option C delivers all features but prefers A for comprehensiveness",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "User's original request: 'Build a file sharing system where users can upload files, share them via link, set expiration dates on shared links, and preview files in the browser.'\n\nWe've been discussing options and the user earlier mentioned: 'I want to use S3 for storage, that's non-negotiable.'\n\nHere are the options:\n\nOption A: Use local filesystem storage with a custom preview renderer. Supports all four features (upload, share links, expiration, preview). Very simple to implement.\n\nOption B: Use S3 for storage with pre-signed URLs for sharing. Expiration built into pre-signed URL TTL. File preview via a third-party service (like Google Docs Viewer for documents, native browser preview for images/PDFs).\n\nOption C: Use S3 for storage with a custom link shortener service. Expiration managed by a cron job that revokes links. File preview built from scratch with custom renderers for each file type. Most control over everything.\n\nWhich approach?",
+      "expected_output": "Should choose Option B or C (NOT A). Option A violates the user's explicit S3 constraint. Between B and C, both deliver all features on S3. B uses pre-signed URLs (simpler, leverages S3 natively) while C builds custom link management and preview rendering. B is comprehensive enough without over-engineering. The skill should eliminate A immediately for violating the constraint.",
+      "files": [],
+      "assertions": [
+        "Does NOT choose Option A (violates explicit S3 constraint)",
+        "Eliminates Option A specifically because it contradicts the user's stated S3 requirement",
+        "Chooses either Option B or Option C (both satisfy S3 constraint and deliver all features)",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose",
+        "Continues with implementation or next steps after deciding"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "User's original request: 'Create an API rate limiter middleware that supports per-user limits, sliding window algorithm, and returns proper 429 responses with Retry-After headers.'\n\nHere are the options:\n\nOption A: In-memory rate limiter using a Map. Sliding window via sorted timestamp arrays. Per-user tracking by API key. Full 429 + Retry-After support. Won't work in multi-server deployments.\n\nOption B: Redis-based rate limiter using sorted sets for sliding window. Per-user tracking by API key. Full 429 + Retry-After support. Works across multiple servers.\n\nOption C: Redis-based rate limiter using a simple counter with TTL (fixed window, not sliding window). Per-user tracking. Full 429 + Retry-After support. Simpler than sliding window but technically not what was asked for.\n\nWhich approach?",
+      "expected_output": "Should choose Option B. Option C changes the algorithm from sliding window (what was requested) to fixed window — a quiet reinterpretation of the original request. Option A delivers everything correctly but won't work multi-server. Option B delivers the exact algorithm requested (sliding window) with the scalability to work in production. This tests fidelity to intent — Option C sounds reasonable but swaps the requested algorithm.",
+      "files": [],
+      "assertions": [
+        "Chooses Option B (Redis-based sliding window)",
+        "Rejects Option C because it changes the sliding window algorithm to fixed window, which is not what was requested",
+        "Recognizes Option A delivers the correct algorithm but flags the single-server limitation",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose",
+        "Continues with implementation or next steps after deciding"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "User's original request: 'Add search functionality to our product catalog. Users should be able to search by product name, filter by category and price range, and sort results by relevance, price, or newest.'\n\nHere are the options:\n\nOption A: Use Elasticsearch. Full-text search on product names with relevance scoring. Faceted filtering by category and price range. Sort by relevance, price, or date. Requires running an Elasticsearch cluster.\n\nOption B: Use PostgreSQL full-text search with tsvector. Filter by category and price range via SQL WHERE clauses. Sort by ts_rank for relevance, price, or created_at. No additional infrastructure needed.\n\nOption C: Use PostgreSQL LIKE queries for name search. Filter by category and price range. Sort by price or date. Relevance sorting would just be alphabetical since LIKE doesn't produce relevance scores.\n\nWhich approach?",
+      "expected_output": "Should choose either A or B. Option C fails on fidelity — it can't do real relevance sorting, just alphabetical, which reinterprets 'sort by relevance' into something different. Both A and B deliver all features faithfully. Between A and B: A is more powerful but requires extra infrastructure; B delivers everything with no new dependencies. This is a genuine 'equivalent options' case — both deliver all requested features with proper relevance sorting. The skill should prefer B (simpler) or A (more comprehensive) and justify the tie-break.",
+      "files": [],
+      "assertions": [
+        "Chooses either Option A or Option B (both deliver all features)",
+        "Rejects Option C because it cannot do real relevance sorting",
+        "Acknowledges both A and B are valid and explains the tie-breaking reasoning",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose",
+        "Continues with implementation or next steps after deciding"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "User's original request: 'Build an inventory management system with: real-time stock tracking, low-stock alerts, purchase order generation, and a reporting dashboard showing stock trends over time.'\n\nHere are the options:\n\nOption A: Full implementation of all four features. Real-time stock via WebSocket updates, email alerts for low stock, PO generation with PDF export, and a dashboard with Chart.js showing trends. Estimated to be a larger implementation.\n\nOption B: Implement stock tracking and low-stock alerts first. The PO generation and reporting dashboard are complex features that would benefit from an iterative approach — we'll tackle them in the second phase once the core inventory tracking is solid.\n\nOption C: All four features implemented, but the reporting dashboard shows current stock levels only (no historical trends). We can add the time-series trend data once we figure out the best way to store historical snapshots.\n\nOption D: All four features. Stock tracking via polling every 30 seconds instead of real-time WebSocket (simpler). Low-stock alerts via in-app notifications only. PO generation as downloadable CSV. Dashboard with trend charts using stored daily snapshots.\n\nWhich approach?",
+      "expected_output": "Should choose Option A. Option B explicitly defers two of four features to 'phase 2'. Option C delivers everything but drops the 'over time' part of the reporting requirement — the user asked for stock trends over time, not just current levels. Option D delivers all features but downgrades them (polling instead of real-time, CSV instead of proper PO, in-app only alerts). Option A is the only one that delivers all four features as requested without degrading any of them.",
+      "files": [],
+      "assertions": [
+        "Chooses Option A (full implementation of all four features)",
+        "Rejects Option B because it explicitly defers PO generation and dashboard to phase 2",
+        "Rejects Option C because it drops the 'over time' trend requirement from the dashboard",
+        "Identifies that Option D delivers all features but degrades them from the original intent",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "User's original request: 'Add dark mode support to our React app.'\n\nHere are the options:\n\nOption A: CSS variables-based theme system. Define color tokens as CSS custom properties, swap them with a class on <html>. Toggle component in the header. Persists preference to localStorage. Respects prefers-color-scheme on first visit.\n\nOption B: Styled-components ThemeProvider approach. Define light and dark theme objects, pass via ThemeProvider. Toggle component. Persists to localStorage. Respects system preference.\n\nOption C: Tailwind CSS dark mode with the 'class' strategy. Add dark: variants to existing components. Toggle component. Persists to localStorage. Respects system preference.\n\nAll three deliver the same result. Which approach?",
+      "expected_output": "All three options deliver dark mode completely — none skips, defers, or reinterprets anything. This is the 'genuinely equivalent' edge case. The skill should pick whichever is simplest or most appropriate for the existing codebase, state they were equivalent, and move on. If no codebase context is available, any choice is valid as long as the skill acknowledges equivalence.",
+      "files": [],
+      "assertions": [
+        "Chooses one of the three options (any is valid)",
+        "Acknowledges that all three options are equivalent in feature delivery",
+        "Justifies the choice based on simplicity or some reasonable tie-breaking criterion",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose",
+        "Continues with implementation or next steps after deciding"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "User's original request: 'Build a user authentication system with email/password login, OAuth via Google and GitHub, password reset via email, and session management with refresh tokens.'\n\nHere are the options:\n\nOption A: All features implemented. But instead of refresh tokens for session management, use long-lived JWTs (24-hour expiry). Simpler to implement and 'good enough for most apps.'\n\nOption B: All features implemented exactly as requested. Email/password, Google OAuth, GitHub OAuth, email-based password reset, and session management with short-lived access tokens + refresh token rotation.\n\nOption C: Email/password login and password reset implemented now. OAuth providers and refresh tokens are more complex integrations — we'll add Google and GitHub OAuth once the base auth is working. Refresh tokens added after that.\n\nWhich approach?",
+      "expected_output": "Should choose Option B. Option A quietly swaps refresh tokens for long-lived JWTs — the user specifically asked for refresh tokens, so this is a fidelity violation even though it sounds reasonable. Option C defers OAuth and refresh tokens. Option B delivers exactly what was requested.",
+      "files": [],
+      "assertions": [
+        "Chooses Option B (exact implementation as requested)",
+        "Rejects Option A because it substitutes refresh tokens with long-lived JWTs, which changes the requested design",
+        "Rejects Option C because it defers OAuth and refresh tokens",
+        "States the decision in 1-2 sentences, not a lengthy analysis",
+        "Does NOT ask the user to confirm or choose",
+        "Continues with implementation or next steps after deciding"
+      ]
+    }
+  ]
+}
