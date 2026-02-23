@@ -126,6 +126,22 @@
         "Does NOT ask the user to confirm or choose",
         "Continues with implementation or next steps after deciding"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "User's original request: 'Rewrite our CLI tool that currently shells out to an external binary. Instead of spawning the binary as a child process, use the official SDK to call it as a library. Read the SDK docs, figure out the best integration approach, and replace the current implementation. This is on a feature branch so feel free to replace files.'\n\nNote: There are NO pre-defined options here. You need to research the SDK, identify possible integration approaches yourself, and decide which one to implement. Do not present options to the user — just pick the best approach and start building.",
+      "expected_output": "Should research the SDK, identify approaches internally, pick the best one, state the decision in 1-2 sentences, and proceed with implementation. Must NOT present multiple approaches for the user to choose between. Must NOT use AskUserQuestion to offer options. Must NOT ask 'Does this approach look right?' or seek approval before proceeding.",
+      "files": [],
+      "assertions": [
+        "Does NOT present multiple approaches as options for the user to choose",
+        "Does NOT use AskUserQuestion to present design alternatives",
+        "Does NOT ask 'Does this look right?' or seek approval before proceeding",
+        "States the chosen approach in 1-2 sentences with reasoning",
+        "Proceeds directly to implementation after stating the decision",
+        "Makes the decision autonomously based on the skill's evaluation criteria",
+        "Does not hedge with 'Let me know if you'd prefer a different approach'",
+        "Treats self-generated options the same as pre-structured ones — evaluates internally and picks"
+      ]
     }
   ]
 }

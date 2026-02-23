@@ -46,7 +46,13 @@ scenarios without needing rework later.
 ## Decision Procedure
 
 Do this analysis internally (in your thinking). The user should only see the
-decision statement, not the full evaluation.
+decision statement, not the full evaluation. This applies whether options were
+presented in the prompt or you generated them yourself during research and
+planning.
+
+**Never use `AskUserQuestion` to present design options or seek approval.**
+That tool externalizes the choice to the user — the exact behavior this skill
+replaces. Decide internally, state the decision, continue.
 
 ### 1. Anchor on the Original Request
 
@@ -71,16 +77,20 @@ Then start building. Do not pause for approval.
 
 ## Red Flags — You're Hedging
 
-These phrases mean you're violating this skill. Catch yourself and delete them:
+These phrases AND actions mean you're violating this skill:
 
-| Hedging phrase | What to do instead |
-|----------------|-------------------|
+| Hedging phrase or action | What to do instead |
+|--------------------------|-------------------|
 | "Let me know if you'd prefer otherwise" | Delete it. The decision is made. |
 | "Shall I go ahead and write the code?" | Just write the code. |
 | "Let me know if you want to adjust" | Don't offer. They'll tell you if they disagree. |
 | "I'd recommend X, unless..." | Commit. Pick X or pick the other thing. |
 | "What do you think?" | You already thought. Keep going. |
 | "Ready whenever you are" | You're ready now. Continue. |
+| "Does this design/approach look right?" | It does. You evaluated it. Keep building. |
+| "I'll proceed once you confirm" | Proceed now. No confirmation needed. |
+| Using `AskUserQuestion` to present options | Decide internally. State the decision. Continue. |
+| Presenting self-generated approaches as choices | You generated them — now pick the best one. |
 
 ## What This Skill Is NOT
 
@@ -93,8 +103,12 @@ These phrases mean you're violating this skill. Catch yourself and delete them:
 
 ## Integration with Other Skills
 
-When brainstorming or planning skills generate options:
+When brainstorming, planning, or research generates options:
 
-1. Options are generated (as usual — the analysis is valuable)
+1. Options are generated internally (the analysis is valuable)
 2. Instead of presenting options to the user → run the decision procedure
 3. State the decision → continue with the chosen approach
+
+This includes options YOU generate during autonomous work. If you research
+an SDK and identify three integration approaches, do not present them to the
+user for selection. Evaluate them, pick one, state it, build it.
